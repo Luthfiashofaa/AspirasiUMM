@@ -6,14 +6,22 @@ const routes = [
     { 
         path: '/', 
         name: 'home', 
-        component: () => import( /* webpackChunkName: "home" */ 
-'../views/home.vue') 
+        component: () => import( /* webpackChunkName: "home" */ '../views/home.vue') 
+    }, 
+    { 
+        path: '/pengaduan', 
+        name: 'pengaduan', 
+        component: () => import( /* webpackChunkName: "home" */ '../views/pengaduan/index.vue') 
+    }, 
+    { 
+        path: '/kategori', 
+        name: 'kategori', 
+        component: () => import( /* webpackChunkName: "pengaduan" */ '../views/kategori/index.vue') 
     }, 
     {
-        path: '/#about',
-        name: 'about',
-        component: () => import( /* webpackChunkName: "home" */ 
-            '../views/home.vue')
+        path: '/statistik',
+        name: 'statistik',
+        component: () => import( /* webpackChunkName: "home" */ '../views/statistik/index.vue')
     },
     {
         path: '/#service',

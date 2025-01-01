@@ -57,24 +57,24 @@ export default {
   <section class="feature_section">
     <div class="container">
       <div class="feature_container">
-        <div class="box">
+        <router-link to="/pengaduan" class="box">
           <div class="img-box">
             <img src="/images/complain.png" alt="">
           </div>
           <h5 class="name">
-            Kirim Pengaduan
+             Pengaduan
           </h5>
-        </div>
-        <div class="box">
+        </router-link>
+        <router-link to="/statistik" class="box">
           <div class="img-box">
             <img src="/images/statistik.png" alt="">
           </div>
           <h5 class="name">
             Laporan Statistik Pengaduan
           </h5>
+        </router-link>
         </div>
       </div>
-    </div>
   </section>
 
   <!-- end feature section -->
