@@ -1,23 +1,35 @@
 <template>
   <!-- Bagian Slider -->
-  <section class="slider_section position-relative overflow-hidden" style="background-color: #f8f9fa;">
+  <section
+    class="slider_section position-relative overflow-hidden"
+    style="background-color: #f8f9fa"
+  >
     <div class="container py-5">
       <div class="row align-items-center">
         <!-- Teks Informasi -->
         <div class="col-md-6">
           <div class="detail-box">
             <h1 class="text-danger display-4 fw-bold">
-              Buat <br /> Pengaduan <br /> Anda
+              Buat <br />
+              Pengaduan <br />
+              Anda
             </h1>
             <p class="text-secondary mt-3">
-              Sampaikan keluhan atau masukan Anda untuk layanan yang lebih baik, Kami siap membantu Anda!
+              Sampaikan keluhan atau masukan Anda untuk layanan yang lebih baik,
+              Kami siap membantu Anda!
             </p>
-            <a href="#" class="btn custom-btn-primary btn-lg mt-3 px-4">FORMULIR PENGADUAN</a>
+            <a href="#" class="btn custom-btn-primary btn-lg mt-3 px-4"
+              >FORMULIR PENGADUAN</a
+            >
           </div>
         </div>
         <!-- Ilustrasi atau Gambar -->
         <div class="col-md-6">
-          <img src="../../assets/suaraa.png" alt="Ilustrasi Pengaduan" style="animation: float 3s ease-in-out infinite;" />
+          <img
+            src="../../assets/suaraa.png"
+            alt="Ilustrasi Pengaduan"
+            style="animation: float 3s ease-in-out infinite"
+          />
         </div>
       </div>
     </div>
@@ -37,24 +49,52 @@
   <div class="mt-5 mx-5">
     <h2 class="text-dark fw-bold text-center">Kategori Pengaduan</h2>
     <p class="text-muted text-center mb-4">
-      Pilih kategori pengaduan yang anda ingin lihat, Setiap kategori berisikan pengaduan semua orang sesuai dengan permasalahannya.
+      Pilih kategori pengaduan yang anda ingin lihat, Setiap kategori berisikan
+      pengaduan semua orang sesuai dengan permasalahannya.
     </p>
 
     <div class="row mt-4 mb-5">
-      <div
-        v-for="(category, index) in categories"
-        :key="index"
-        class="col-md-3 mb-2"
-      >
-        <router-link to="/kategori" class="card text-center shadow-sm tag-card p-2">
+      <div class="col-md-3 mb-2">
+        <router-link
+          to="/fasilitas"
+          class="card text-center shadow-sm tag-card p-2"
+        >
           <div class="card-body p-2 d-flex flex-column align-items-center">
-            <h6 class="tag-title fw-bold">{{ category.name }}</h6>
+            <h6 class="tag-title fw-bold">Fasilitas</h6>
           </div>
         </router-link>
-
+      </div>
+      <div class="col-md-3 mb-2">
+        <router-link
+          to="/layanan"
+          class="card text-center shadow-sm tag-card p-2"
+        >
+          <div class="card-body p-2 d-flex flex-column align-items-center">
+            <h6 class="tag-title fw-bold">Layanan</h6>
+          </div>
+        </router-link>
+      </div>
+      <div class="col-md-3 mb-2">
+        <router-link
+          to="/akademik"
+          class="card text-center shadow-sm tag-card p-2"
+        >
+          <div class="card-body p-2 d-flex flex-column align-items-center">
+            <h6 class="tag-title fw-bold">Akademik</h6>
+          </div>
+        </router-link>
+      </div>
+      <div class="col-md-3 mb-2">
+        <router-link
+          to="/kebersihan"
+          class="card text-center shadow-sm tag-card p-2"
+        >
+          <div class="card-body p-2 d-flex flex-column align-items-center">
+            <h6 class="tag-title fw-bold">Kebersihan</h6>
+          </div>
+        </router-link>
       </div>
     </div>
-
   </div>
 
   <!-- Daftar Pengaduan
@@ -136,22 +176,45 @@ export default {
       security: 700,
       profiles: [
         { name: "Michael Spitz", status: "Selesai", focusAreas: ["Fasilitas"] },
-        { name: "Marco Coppeto", status: "Dibatalkan", focusAreas: ["Layanan"] },
-        { name: "Gene Ross", status: "Selesai", focusAreas: ["Kemanan"] },
+        {
+          name: "Marco Coppeto",
+          status: "Dibatalkan",
+          focusAreas: ["Layanan"],
+        },
+        { name: "Gene Ross", status: "Selesai", focusAreas: ["Akademik"] },
       ],
       categories: [
-        { name: "Fasilitas", icon: "bi bi-gear-fill", description: "Keluhan terkait fasilitas umum." },
-        { name: "Layanan", icon: "bi bi-people-fill", description: "Keluhan terkait pelayanan." },
-        { name: "Keamanan", icon: "bi bi-shield-fill", description: "Keluhan terkait keamanan." },
-        { name: "Kebersihan", icon: "bi bi-trash-fill", description: "Keluhan terkait kebersihan." },
+        {
+          name: "Fasilitas",
+          icon: "bi bi-gear-fill",
+          description: "Keluhan terkait fasilitas umum.",
+        },
+        {
+          name: "Layanan",
+          icon: "bi bi-people-fill",
+          description: "Keluhan terkait pelayanan.",
+        },
+        {
+          name: "Akademik",
+          icon: "bi bi-shield-fill",
+          description: "Keluhan terkait Akademik.",
+        },
+        {
+          name: "Kebersihan",
+          icon: "bi bi-trash-fill",
+          description: "Keluhan terkait kebersihan.",
+        },
       ],
     };
   },
   computed: {
     filteredProfiles() {
       return this.profiles.filter((profile) => {
-        const matchesName = profile.name.toLowerCase().includes(this.searchQuery.toLowerCase());
-        const matchesStatus = !this.selectedStatus || profile.status === this.selectedStatus;
+        const matchesName = profile.name
+          .toLowerCase()
+          .includes(this.searchQuery.toLowerCase());
+        const matchesStatus =
+          !this.selectedStatus || profile.status === this.selectedStatus;
         return matchesName && matchesStatus;
       });
     },
@@ -295,6 +358,4 @@ export default {
 .tag-card:hover i {
   color: #fff; /* Pastikan teks dan ikon berubah menjadi putih */
 }
-
-
 </style>

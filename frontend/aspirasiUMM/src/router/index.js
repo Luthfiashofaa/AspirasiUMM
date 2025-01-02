@@ -13,11 +13,6 @@ const routes = [
         name: 'pengaduan', 
         component: () => import( /* webpackChunkName: "home" */ '../views/pengaduan/index.vue') 
     }, 
-    { 
-        path: '/kategori', 
-        name: 'kategori', 
-        component: () => import( /* webpackChunkName: "pengaduan" */ '../views/kategori/index.vue') 
-    }, 
     {
         path: '/statistik',
         name: 'statistik',
@@ -53,6 +48,30 @@ const routes = [
         component: () => import( /* webpackChunkName: "home" */ 
             '../views/admin-dashboard.vue')
     },
+
+
+
+
+    { 
+        path: '/fasilitas', 
+        name: 'fasilitas', 
+        component: () => import( /* webpackChunkName: "pengaduan" */ '../views/kategori/fasilitas.vue') 
+    }, 
+    { 
+        path: '/akademik', 
+        name: 'akademik', 
+        component: () => import( /* webpackChunkName: "pengaduan" */ '../views/kategori/akademik.vue') 
+    }, 
+    { 
+        path: '/kebersihan', 
+        name: 'kebersihan', 
+        component: () => import( /* webpackChunkName: "pengaduan" */ '../views/kategori/kebersihan.vue') 
+    }, 
+    { 
+        path: '/layanan', 
+        name: 'layanan', 
+        component: () => import( /* webpackChunkName: "pengaduan" */ '../views/kategori/layanan.vue') 
+    }, 
 ]
 
 const router = createRouter({ 
