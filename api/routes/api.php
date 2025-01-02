@@ -10,7 +10,7 @@ return $request->user();
 })->middleware(Authenticate::using('sanctum')); 
 
 //posts 
-Route::apiResource('/user', App\Http\Controllers\Api\UserController::class); 
+Route::apiResource('/get-user', App\Http\Controllers\Api\UserController::class); 
 Route::apiResource('/comment', App\Http\Controllers\Api\CommentController::class);
 Route::apiResource('/complaint', App\Http\Controllers\Api\ComplaintController::class);
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {

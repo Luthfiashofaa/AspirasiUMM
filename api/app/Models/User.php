@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class User extends Authenticatable
 {
@@ -18,7 +19,7 @@ class User extends Authenticatable
         'nim',
         'name',
         'password',
-        'profile',
+        'image',
         'role'
     ];
 
@@ -41,4 +42,11 @@ class User extends Authenticatable
     {
         return $this->role === 'mahasiswa';
     }
+
+    protected function image(): Attribute 
+    { 
+        return Attribute::make( 
+            get: fn ($image) => url('/storage/posts/' . $image), 
+        ); 
+    } 
 }

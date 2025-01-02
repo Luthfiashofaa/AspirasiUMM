@@ -28,7 +28,7 @@ class UserController extends Controller
     {
         // Define validation rules
         $validator = Validator::make($request->all(), [
-            'profile'     => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'name'     => 'required',
             'nim'   => 'required|unique:users',
             'password'   => 'required|min:6',
@@ -40,15 +40,15 @@ class UserController extends Controller
         }
 
         //upload image
-        $profile = $request->file('profile');
-        $profile->storeAs('public/profile', $profile->hashName());
+        $image = $request->file('image');
+        $image->storeAs('posts', $image->hashName());
 
         // Generate remember token
         $remember_token = Str::random(60);
 
         // Create the user
         $user = User::create([
-            'profile'     => $profile->hashName(),
+            'image'     => $image->hashName(),
             'name'     => $request->name,
             'nim'   => $request->nim,
             'password'   => Hash::make($request->password),
