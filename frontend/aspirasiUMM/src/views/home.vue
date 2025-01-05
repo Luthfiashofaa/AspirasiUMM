@@ -39,9 +39,10 @@ export default {
               <p>
                 Platform bagi mahasiswa untuk mengajukan pengaduan terkait berbagai masalah di kampus. Setiap pengaduan akan ditangani dengan serius untuk menciptakan lingkungan kampus yang lebih baik.
               </p>
-              <a href="">
-                Kirim Pengaduan
-              </a>
+              <router-link :to="{ name: 'buat-aduan' }">Kirim Pengaduan</router-link>
+
+          
+  
             </div>
           </div>
           <div class="col-md-6">

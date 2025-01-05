@@ -18,9 +18,7 @@
               Sampaikan keluhan atau masukan Anda untuk layanan yang lebih baik,
               Kami siap membantu Anda!
             </p>
-            <a href="#" class="btn custom-btn-primary btn-lg mt-3 px-4"
-              >FORMULIR PENGADUAN</a
-            >
+            <router-link :to="{ name: 'buat-aduan' }" class="btn custom-btn-primary btn-lg mt-3 px-4">Formulir Pengaduan</router-link>
           </div>
         </div>
         <!-- Ilustrasi atau Gambar -->

@@ -41,7 +41,7 @@ class UserController extends Controller
 
         //upload image
         $image = $request->file('image');
-        $image->storeAs('posts', $image->hashName());
+        $image->storeAs('public/posts', $image->hashName());
 
         // Generate remember token
         $remember_token = Str::random(60);

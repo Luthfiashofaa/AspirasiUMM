@@ -14,6 +14,24 @@ const routes = [
         component: () => import( /* webpackChunkName: "home" */ '../views/pengaduan/index.vue') 
     }, 
     {
+        path: '/buat-aduan',
+        name: 'buat-aduan',
+        component: () => import( /* webpackChunkName: "home" */ '../views/FormPengaduan/formpengaduan.vue') 
+    
+    },
+    {
+        path: '/aduan-saya',
+        name: 'aduan-saya',
+        component: () => import( /* webpackChunkName: "home" */ '../views/myaduan/index.vue') 
+
+    },
+    {
+        path: '/detail-aduan',
+        name: 'detail-aduan',
+        component: () => import( /* webpackChunkName: "home" */ '../views/myaduan/detail.vue') 
+
+    },
+    {
         path: '/statistik',
         name: 'statistik',
         component: () => import( /* webpackChunkName: "home" */ '../views/statistik/index.vue')
