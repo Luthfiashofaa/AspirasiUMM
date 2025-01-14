@@ -159,6 +159,12 @@ export default {
                 <li class="nav-item">
                   <a class="nav-link" href="#contact" @click="scrollToContact">Contact Us</a>
                 </li>
+                <li class="nav-item">
+                  <router-link :to="{ name: 'faq' }" class="nav-link">FAQ</router-link>
+                </li>
+                <li class="nav-item">
+                  <router-link :to="{ name: 'dashboard' }" class="nav-link">Complaint</router-link>
+                </li>
                 <!-- Menambahkan menu untuk role admin atau mahasiswa -->
                 <li v-if="isLoggedIn && role === 'admin'" class="nav-item">
                   <router-link :to="{ name: 'admin-dashboard' }" class="nav-link">Admin Dashboard</router-link>
@@ -206,12 +212,8 @@ export default {
       </div>
     </header>
     <!-- end header section -->
-
-    <!-- Konten utama halaman bisa diletakkan di sini -->
-    <div class="main-content">
-      <!-- Konten lainnya -->
-    </div>
   </div>
+
 
   <router-view></router-view>
 
