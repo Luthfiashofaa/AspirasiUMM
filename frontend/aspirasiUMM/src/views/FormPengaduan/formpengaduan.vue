@@ -1,3 +1,116 @@
+<script setup>
+import { ref, onMounted } from "vue";
+import { useRouter } from 'vue-router';
+import api from "../../api";
+
+
+const router = useRouter();
+
+
+const judul = ref("");
+const deskripsi = ref("");
+const kategori = ref("");
+const errors = ref([]);
+const userId = ref(null); 
+const isAuthenticated = ref(false);
+
+const checkAuth = async () => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    router.push({
+      name: 'login',
+      query: { redirect: router.currentRoute.value.fullPath }
+    });
+    return;
+  }
+
+  try {
+    await getUserData();
+    isAuthenticated.value = true;
+  } catch (error) {
+    console.error('Authentication check failed:', error);
+    localStorage.removeItem('token');
+    router.push({
+      name: 'login',
+      query: { redirect: router.currentRoute.value.fullPath }
+    });
+  }
+};
+
+const getUserData = async () => {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await api.get('/api/user', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+       
+        userId.value = response.data.nim || response.data.id;
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+    }
+};
+
+
+onMounted(() => {
+    getUserData();
+});
+
+
+const validateForm = () => {
+    if (judul.value === "" || kategori.value === "" || deskripsi.value === "") {
+        alert("Harap isi semua kolom sebelum mengirim pengaduan.");
+        return false;
+    }
+    if (!userId.value) {
+        alert("Data user tidak ditemukan. Silakan login kembali.");
+        return false;
+    }
+    return true;
+};
+
+const storePost = async () => {
+    if (!validateForm()) return;
+
+    let formData = new FormData();
+
+ 
+    formData.append("judul", judul.value);
+    formData.append("deskripsi", deskripsi.value);
+    formData.append("kategori", kategori.value);
+    formData.append("status", "unanswered");
+    formData.append("user_id", userId.value); 
+    
+    try {
+        const token = localStorage.getItem('token');
+        
+     
+        const config = {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        };
+
+    
+        await api.post('/api/complaint', formData, config);
+        
+        alert(`Pengaduan Anda berhasil dikirim!\n\nJudul: ${judul.value}\nKategori: ${kategori.value}\nDeskripsi: ${deskripsi.value}`);
+        
+      
+        judul.value = "";
+        kategori.value = "";
+        deskripsi.value = "";
+        
+        
+        router.push({ path: "/aduan-saya" });
+    } catch (error) {
+        
+        errors.value = error.response.data;
+    }
+};
+</script>
+
 <template>
   <section class="pengaduan-section py-5">
     <div class="container">
@@ -5,14 +118,14 @@
         <div class="col-md-10">
           <div class="card shadow-timbul">
             <div class="card-body">
-              <!-- Judul dan Deskripsi -->
+            
               <div class="text-center mb-5 pt-4">
                 <h1 class="fw-bold">Formulir Pengaduan</h1>
                 <p class="text-muted">Isi formulir berikut untuk menyampaikan pengaduan Anda kepada kami.</p>
               </div>
 
-              <form>
-                <!-- Input Judul -->
+              <form @submit.prevent="storePost">
+                
                 <div class="mb-3">
                   <label for="judul" class="form-label fw-bold">Judul Pengaduan</label>
                   <input
@@ -22,9 +135,12 @@
                     v-model="judul"
                     placeholder="Masukkan judul pengaduan"
                   />
+                  <div v-if="errors.judul" class="alert alert-danger mt-2">
+                    <span>{{ errors.judul[0] }}</span>
+                  </div>
                 </div>
 
-                <!-- Textarea Deskripsi -->
+                
                 <div class="mb-4">
                   <label for="deskripsi" class="form-label fw-bold">Deskripsi Pengaduan</label>
                   <textarea
@@ -34,9 +150,12 @@
                     v-model="deskripsi"
                     placeholder="Jelaskan masalah atau keluhan Anda secara detail..."
                   ></textarea>
+                  <div v-if="errors.deskripsi" class="alert alert-danger mt-2">
+                    <span>{{ errors.deskripsi[0] }}</span>
+                  </div>
                 </div>
 
-                <!-- Dropdown Kategori -->
+              
                 <div class="mb-5 d-flex align-items-center kategori-wrapper">
                   <label for="kategori" class="form-label fw-bold me-3">Kategori Aduan</label>
                   <select class="form-select" id="kategori" v-model="kategori" style="width: 50%;">
@@ -48,13 +167,9 @@
                   </select>
                 </div>
 
-                <!-- Tombol Submit -->
+                
                 <div class="text-center">
-                  <button
-                    type="button"
-                    class="btn btn-primary btn-lg px-5"
-                    @click="submitPengaduan"
-                  >
+                  <button type="submit" class="btn btn-primary btn-lg px-5">
                     Submit Pengaduan
                   </button>
                 </div>
@@ -67,34 +182,8 @@
   </section>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      judul: "",
-      kategori: "",
-      deskripsi: "",
-    };
-  },
-  methods: {
-    submitPengaduan() {
-      if (this.judul === "" || this.kategori === "" || this.deskripsi === "") {
-        alert("Harap isi semua kolom sebelum mengirim pengaduan.");
-        return;
-      }
-      alert(
-        `Pengaduan Anda berhasil dikirim!\n\nJudul: ${this.judul}\nKategori: ${this.kategori}\nDeskripsi: ${this.deskripsi}`
-      );
-      // Reset form
-      this.judul = "";
-      this.kategori = "";
-      this.deskripsi = "";
-    },
-  },
-};
-</script>
-
 <style scoped>
+
 .pengaduan-section {
   background-color: #f8f9fa;
 }
@@ -158,16 +247,15 @@ select.form-select {
   background-color: #081030;
 }
 
-/* Penyesuaian untuk teks agar sedikit lebih ke atas */
 .card-body .text-center {
-  padding-top: 20px;  /* Memberikan jarak atas */
+  padding-top: 20px;
 }
 
 .card-body .text-center h1 {
-  margin-top: 0;  /* Menghilangkan margin atas dari judul */
+  margin-top: 0;
 }
 
 .card-body .text-center p {
-  margin-top: 0;  /* Menghilangkan margin atas dari deskripsi */
+  margin-top: 0;
 }
 </style>

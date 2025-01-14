@@ -11,12 +11,18 @@ const routes = [
     { 
         path: '/pengaduan', 
         name: 'pengaduan', 
-        component: () => import(/* webpackChunkName: "pengaduan" */ '../views/pengaduan/index.vue') 
+        component: () => import(/* webpackChunkName: "pengaduan" */ '../views/pengaduan/index.vue') ,
+        meta: {
+            requiresAuth: true // Add this meta field
+          }
     }, 
     {
         path: '/buat-aduan',
         name: 'buat-aduan',
-        component: () => import(/* webpackChunkName: "buat-aduan" */ '../views/FormPengaduan/formpengaduan.vue') 
+        component: () => import(/* webpackChunkName: "buat-aduan" */ '../views/FormPengaduan/formpengaduan.vue'),
+        meta: {
+            requiresAuth: true // Add this meta field
+          }
     },
     {
         path: '/aduan-saya',
@@ -49,11 +55,6 @@ const routes = [
         component: () => import(/* webpackChunkName: "login" */ '../views/login.vue')
     },
     {
-        path: '/my-complaint',
-        name: 'my-complaint',
-        component: () => import(/* webpackChunkName: "my-complaint" */ '../views/complaint-list.vue')
-    },
-    {
         path: '/admin-dashboard',
         name: 'admin-dashboard',
         component: () => import(/* webpackChunkName: "admin-dashboard" */ '../views/admin-dashboard.vue')
@@ -84,15 +85,31 @@ const routes = [
         component: () => import(/* webpackChunkName: "faq" */ '../views/FAQ.vue')
     },
     {
-        path: '/dashboard',
-        name: 'dashboard',
-        component: () => import(/*webpackChunkName: "admin" */ '../views/dashboard.vue')
-    }
+        path: '/comment/:id',
+        name: 'comment',
+        component: () => import(/* webpackChunkName: "faq" */ '../views/comments/complaintscomments.vue')
+    },
+
 ]
 
 const router = createRouter({ 
     history: createWebHistory(), 
     routes
 }) 
+
+
+router.beforeEach((to, from, next) => {
+    const token = localStorage.getItem('token')
+    
+    if (to.meta.requiresAuth && !token) {
+      // Redirect to login if trying to access protected route without token
+      next({ 
+        name: 'login',
+        query: { redirect: to.fullPath } // Store intended destination
+      })
+    } else {
+      next()
+    }
+  })
 
 export default router

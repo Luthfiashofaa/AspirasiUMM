@@ -9,6 +9,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
 use Illuminate\Support\Str;
 
 class UserController extends Controller
@@ -56,6 +58,8 @@ class UserController extends Controller
             'remember_token' => $remember_token
         ]);
 
+        Log::info('Password received:', ['password' => $request->password]);
+
         return response()->json([
             'success' => true,
             'message' => 'User successfully registered!',
@@ -72,8 +76,9 @@ class UserController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
+        Log::error('Validation failed:', $validator->errors()->toArray());
+        return response()->json($validator->errors(), 422);
+    }
 
         $user = User::where('nim', $request->nim)->first();
 

@@ -22,11 +22,11 @@
     </div>
 
     <div class="container mt-5">
-  <div class="row">
-    <div v-for="(complaint, index) in filteredComplaints" :key="complaint.id" class="col-md-4 mb-4">
-      <div class="card shadow-lg text-center p-4 custom-card">
-        <!-- Menampilkan Avatar dan Nama Pengguna -->
-        <div class="text-center mb-3">
+      <div class="row d-grid" style="grid-template-columns: repeat(3, 1fr); gap: 16px;">
+  <div v-for="(complaint, index) in filteredComplaints" :key="complaint.id" style="margin-bottom: 15pt;">
+    <div class="card shadow-lg text-center p-4 custom-card d-flex flex-column justify-content-between" style="height: 100%;  ">
+        
+        <div class="text-center mb-3" >
           <img
             v-if="complaint.user" :src="complaint.user.image"
             alt="Avatar"
@@ -42,20 +42,22 @@
           </span>
         </div>
 
-        <!-- Menampilkan Deskripsi Pengaduan -->
+        
         <p class="text-muted small mt-3 mb-3">
           {{ complaint.deskripsi }}
         </p>
 
-        <!-- Menampilkan Kategori Pengaduan -->
+        
         <div class="d-flex justify-content-center flex-wrap mb-3">
           <span class="badge bg-light text-dark mx-1 mb-2">
             {{ complaint.kategori }}
           </span>
         </div>
 
-        <!-- Tombol Detail Pengaduan -->
-        <button class="btn custom-btn-primary btn-block mt-3">Detail Pengaduan</button>
+        
+        <router-link :to="{ name: 'comment', params: { id: complaint.id }}">
+              <button class="btn custom-btn-primary btn-block mt-3">Detail Pengaduan</button>
+            </router-link>
       </div>
     </div>
   </div>

@@ -114,7 +114,7 @@ export default {
       <div class="row">
         <div class="col-md-6">
           <div class="img-box">
-            <img src="/images/professional-img.png" alt="">
+            <<img src="/images/home2.png" alt="" style="width: 400pt;">
           </div>
         </div>
         <div class="col-md-6 ">

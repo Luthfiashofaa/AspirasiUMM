@@ -162,17 +162,14 @@ export default {
                 <li class="nav-item">
                   <router-link :to="{ name: 'faq' }" class="nav-link">FAQ</router-link>
                 </li>
-                <li class="nav-item">
-                  <router-link :to="{ name: 'dashboard' }" class="nav-link">Complaint</router-link>
-                </li>
-                <!-- Menambahkan menu untuk role admin atau mahasiswa -->
+                
                 <li v-if="isLoggedIn && role === 'admin'" class="nav-item">
                   <router-link :to="{ name: 'admin-dashboard' }" class="nav-link">Admin Dashboard</router-link>
                 </li>
                 <li v-if="isLoggedIn && role === 'mahasiswa'" class="nav-item">
-                  <router-link :to="{ name: 'my-complaint' }" class="nav-link">My Complaint</router-link>
+                  <router-link :to="{ name: 'aduan-saya' }" class="nav-link">My Complaint</router-link>
                 </li>
-                <!-- Tombol login/logout -->
+                
                 <li class="nav-item dropdown-container" v-if="isLoggedIn">
                   <button 
                     @click="toggleDropdown" 

@@ -1,10 +1,174 @@
+<script setup>
+import { ref, computed, onMounted } from "vue";
+import api from "../../api";
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+const complaints = ref([]);
+const searchQuery = ref("");
+const selectedCategory = ref("");
+const userId = ref(null);
+const currentUser = ref(null);
+const isEditing = ref(false);
+const selectedAduan = ref(null);
+const isLoading = ref(false);
+
+const categories = [
+  { id: "Layanan", name: "Layanan" },
+  { id: "Kebersihan", name: "Kebersihan" },
+  { id: "Fasilitas", name: "Fasilitas" },
+  { id: "Akademik", name: "Akademik" },
+];
+
+const getUserData = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.get("/api/user", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    currentUser.value = response.data;
+    userId.value = response.data.nim || response.data.id;
+    await fetchDataPosts();
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    alert("Gagal memuat data pengguna. Silakan coba lagi.");
+  }
+};
+
+const fetchDataPosts = async () => {
+  isLoading.value = true;
+  try {
+    const token = localStorage.getItem("token");
+    const response = await api.get("/api/complaint", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    complaints.value = response.data.data.data.filter(
+      (complaint) => complaint.user_id === userId.value
+    );
+  } catch (error) {
+    console.error("Error fetching complaints:", error);
+    alert("Gagal memuat daftar pengaduan. Silakan coba lagi.");
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const filteredComplaints = computed(() => {
+  return complaints.value.filter((complaint) => {
+    const matchesSearch =
+      !searchQuery.value ||
+      complaint.judul.toLowerCase().includes(searchQuery.value.toLowerCase());
+    const matchesCategory =
+      !selectedCategory.value ||
+      complaint.kategori.toLowerCase() === selectedCategory.value.toLowerCase();
+    return matchesSearch && matchesCategory;
+  });
+});
+
+const statusClass = (status) => {
+  const statusLower = status.toLowerCase();
+  switch (statusLower) {
+    case "answered":
+      return "bg-success text-white";
+    case "unanswered":
+      return "bg-secondary text-white";
+    default:
+      return "bg-secondary text-white";
+  }
+};
+
+const editAduan = (complaint) => {
+  selectedAduan.value = { ...complaint };
+  isEditing.value = true;
+};
+
+const updateAduan = async () => {
+  if (!selectedAduan.value.judul || !selectedAduan.value.deskripsi || !selectedAduan.value.kategori) {
+    alert("Mohon lengkapi semua field yang diperlukan.");
+    return;
+  }
+
+  isLoading.value = true;
+  try {
+    const token = localStorage.getItem("token");
+    await api.put(`/api/complaint/${selectedAduan.value.id}`, selectedAduan.value, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    
+    await fetchDataPosts();
+    isEditing.value = false;
+    selectedAduan.value = null;
+    alert("Pengaduan berhasil diperbarui!");
+  } catch (error) {
+    console.error("Error updating complaint:", error);
+    alert("Gagal memperbarui pengaduan. Silakan coba lagi.");
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const cancelEdit = () => {
+  if (confirm("Apakah Anda yakin ingin membatalkan perubahan?")) {
+    isEditing.value = false;
+    selectedAduan.value = null;
+  }
+};
+
+const deleteAduan = async (complaint) => {
+  if (complaint.user_id !== userId.value) {
+    alert("Anda tidak memiliki izin untuk menghapus pengaduan ini.");
+    return;
+  }
+
+  if (confirm("Apakah Anda yakin ingin menghapus pengaduan ini?")) {
+    isLoading.value = true;
+    try {
+      const token = localStorage.getItem("token");
+      await api.delete(`/api/complaint/${complaint.id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      await fetchDataPosts();
+      alert("Pengaduan berhasil dihapus!");
+    } catch (error) {
+      console.error("Error deleting complaint:", error);
+      alert("Gagal menghapus pengaduan. Silakan coba lagi.");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+};
+
+const resetFilters = () => {
+  searchQuery.value = "";
+  selectedCategory.value = "";
+};
+
+const lihatDetail = (complaint) => {
+  router.push({ name: 'comment', params: { id: complaint.id }});
+};
+
+onMounted(() => {
+  getUserData();
+});
+</script>
+
 <template>
   <div class="container py-5">
-    <!-- Judul Halaman -->
     <h2 class="text-center text-dark fw-bold mb-4">Pengaduan Anda</h2>
-    <p class="text-center text-muted mb-4">Lihat semua pengaduan yang telah Anda buat.</p>
+    <p class="text-center text-muted mb-4">
+      Lihat semua pengaduan yang telah Anda buat.
+    </p>
 
-    <!-- Form Pencarian dan Filter -->
+  
     <div class="row mb-4">
       <div class="col-md-8 mb-3 mb-md-0">
         <input
@@ -17,133 +181,149 @@
       <div class="col-md-4">
         <select class="form-select custom-dropdown" v-model="selectedCategory">
           <option value="">Semua Kategori</option>
-          <option value="Layanan">Layanan</option>
-          <option value="Kebersihan">Kebersihan</option>
-          <option value="Fasilitas">Fasilitas</option>
-          <option value="Akademik">Akademik</option>
+          <option
+            v-for="category in categories"
+            :key="category.id"
+            :value="category.id"
+          >
+            {{ category.name }}
+          </option>
         </select>
       </div>
     </div>
 
-    <!-- Grid Card Pengaduan -->
-    <div class="row g-3">
-      <div
-        class="col-md-4 d-flex mb-4"
-        v-for="(aduan, index) in filteredAduan"
-        :key="index"
-      >
-        <div
-          class="card shadow-sm p-4 d-flex flex-column w-100 rounded-3"
-          @mouseover="onCardHover(true, index)"
-          @mouseleave="onCardHover(false, index)"
-          :class="{
-            'bg-blue': aduan.hovered,
-            'transform-scale': aduan.hovered,
-          }"
-        >
-          <!-- Judul Pengaduan -->
-          <h5 class="fw-bold mb-3">{{ aduan.judul }}</h5>
-
-          <!-- Detail Kategori dan Status -->
-          <div class="mb-3 d-flex align-items-center">
-            <span class="text-secondary fw-bold me-2"><strong>Kategori:</strong></span>
-            <span>{{ aduan.kategori }}</span>
-          </div>
-          <div class="mb-3 d-flex align-items-center">
-            <span class="text-secondary fw-bold me-2"><strong>Status:</strong></span>
-            <span
-              class="badge px-3 py-1"
-              :class="statusClass(aduan.status)"
-            >
-              {{ aduan.status }}
-            </span>
-          </div>
-
-          <!-- Deskripsi -->
-          <p class="text-muted mb-3">{{ aduan.deskripsi }}</p>
-
-          <!-- Icon Detail dan Edit dengan jarak yang tepat -->
-          <div class="d-flex justify-content-between mt-auto">
-            <button
-              class="btn btn-sm custom-btn-detail px-4 py-2"
-              @click="lihatDetail(aduan)"
-            >
-              Detail
-            </button>
-            <div class="d-flex align-items-center">
-              <!-- Icon Pensil untuk Edit -->
-              <i
-                class="fas fa-pencil-alt text-primary me-3"
-                @click="editAduan(aduan)"
-                style="cursor: pointer;"
-              ></i>
-              <!-- Icon Tong Sampah untuk Hapus -->
-              <i
-                class="fas fa-trash-alt text-danger delete-icon"
-                @click="deleteAduan(aduan)"
-                style="cursor: pointer;"
-              ></i>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Jika Tidak Ada Data -->
-      <div v-if="filteredAduan.length === 0" class="text-center text-muted">
-        <p>Tidak ada pengaduan yang sesuai dengan pencarian atau filter Anda.</p>
+    <div class="row mb-4">
+      <div class="col-12 text-end">
+        <button class="btn btn-outline-secondary" @click="resetFilters">
+          Reset Filter
+        </button>
       </div>
     </div>
 
-    <!-- Modal Detail Pengaduan -->
-    <div
-      v-if="showDetailCard"
-      class="modal-detail p-4"
-      @click.self="showDetailCard = false"
-    >
-      <div class="card detail-card w-100 p-4 position-relative rounded-3">
-        <!-- Close Button -->
-        <span class="close-btn" @click="showDetailCard = false">&times;</span>
-        
-        <!-- Judul dan Kategori -->
-        <h5 class="fw-bold">{{ selectedAduan.judul }}</h5>
-        <div class="mb-3">
-          <span class="text-secondary fw-bold">Kategori:</span> {{ selectedAduan.kategori }}
-        </div>
 
-        <!-- Deskripsi Pengaduan -->
-        <p>{{ selectedAduan.deskripsi }}</p>
+    <div v-if="isLoading" class="text-center my-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
 
-        <!-- Status -->
-        <div class="mb-3">
-          <span class="text-secondary fw-bold">Status:</span>
-          <span class="badge px-3 py-1" :class="statusClass(selectedAduan.status)">
-            {{ selectedAduan.status }}
-          </span>
-        </div>
 
-        <!-- Form untuk Update -->
-        <div v-if="isEditing" class="d-flex justify-content-center mt-4">
-          <div class="form-group w-100">
-            <label for="judul">Judul</label>
-            <input type="text" id="judul" v-model="selectedAduan.judul" class="form-control mb-2" />
+    <div class="row g-3" v-else>
+    
+      <template v-if="!isEditing">
+        <div
+          class="col-md-4 d-flex mb-4"
+          v-for="complaint in filteredComplaints"
+          :key="complaint.id"
+        >
+          <div class="card shadow-sm p-4 d-flex flex-column w-100 rounded-3">
+            <h5 class="fw-bold mb-3">{{ complaint.judul }}</h5>
 
-            <label for="deskripsi">Deskripsi</label>
-            <textarea id="deskripsi" v-model="selectedAduan.deskripsi" class="form-control mb-2"></textarea>
+            <div class="mb-3 d-flex align-items-center">
+              <span class="text-secondary fw-bold me-2">Kategori:</span>
+              <span>{{ complaint.kategori }}</span>
+            </div>
+            <div class="mb-3 d-flex align-items-center">
+              <span class="text-secondary fw-bold me-2">Status:</span>
+              <span
+                class="badge px-3 py-1"
+                :class="statusClass(complaint.status)"
+              >
+                {{ complaint.status }}
+              </span>
+            </div>
 
-            <label for="kategori">Kategori</label>
-            <select id="kategori" v-model="selectedAduan.kategori" class="form-control mb-2">
-              <option value="Layanan">Layanan</option>
-              <option value="Kebersihan">Kebersihan</option>
-              <option value="Fasilitas">Fasilitas</option>
-              <option value="Akademik">Akademik</option>
-            </select>
+            <p class="text-muted mb-3">{{ complaint.deskripsi }}</p>
 
-            <button class="btn btn-primary mx-2" @click="updateAduan">Update</button>
+            <div class="d-flex justify-content-between mt-auto">
+              <button
+                class="btn btn-sm custom-btn-detail px-4 py-2"
+                @click="lihatDetail(complaint)"
+              >
+                Detail
+              </button>
+              <div class="d-flex align-items-center">
+                <i
+                  class="fas fa-pencil-alt text-primary me-3"
+                  @click="editAduan(complaint)"
+                  style="cursor: pointer;"
+                ></i>
+                <i
+                  class="fas fa-trash-alt text-danger delete-icon"
+                  @click="deleteAduan(complaint)"
+                  style="cursor: pointer;"
+                ></i>
+              </div>
+            </div>
           </div>
         </div>
-        <div v-else>
-          <div class="d-flex justify-content-center mt-4">
-            <button class="btn btn-primary mx-2" @click="toggleEditMode">Edit</button>
+
+
+        <div
+          v-if="filteredComplaints.length === 0"
+          class="col-12 text-center text-muted"
+        >
+          <p>
+            Tidak ada pengaduan yang sesuai dengan pencarian atau filter Anda.
+          </p>
+        </div>
+      </template>
+
+      
+      <div v-else class="col-12">
+        <div class="card shadow-sm p-4">
+          <h4 class="mb-4">Edit Pengaduan</h4>
+          <div class="form-group">
+            <label for="judul" class="form-label">Judul</label>
+            <input 
+              type="text" 
+              id="judul" 
+              v-model="selectedAduan.judul" 
+              class="form-control mb-3"
+              required
+            />
+
+            <label for="deskripsi" class="form-label">Deskripsi</label>
+            <textarea 
+              id="deskripsi" 
+              v-model="selectedAduan.deskripsi" 
+              class="form-control mb-3"
+              rows="4"
+              required
+            ></textarea>
+
+            <label for="kategori" class="form-label">Kategori</label>
+            <select 
+              id="kategori" 
+              v-model="selectedAduan.kategori" 
+              class="form-control mb-4" style="height: 35pt;"
+              required
+            >
+              <option value="">Pilih Kategori</option>
+              <option v-for="category in categories" 
+                      :key="category.id" 
+                      :value="category.id">
+                {{ category.name }}
+              </option>
+            </select>
+
+            <div class="d-flex justify-content-end gap-2">
+              <button 
+                class="btn btn-secondary" 
+                @click="cancelEdit"
+                :disabled="isLoading"
+              >
+                Batal
+              </button>
+              <button 
+                class="btn btn-primary" 
+                @click="updateAduan"
+                :disabled="isLoading"
+              >
+                <span v-if="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                {{ isLoading ? 'Menyimpan...' : 'Simpan Perubahan' }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -151,119 +331,14 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      searchQuery: "",
-      selectedCategory: "",
-      aduanList: [
-        {
-          judul: "Lampu Jalan Rusak di Depan Gedung A",
-          kategori: "Fasilitas",
-          deskripsi:
-            "Lampu jalan yang berada di depan Gedung A sudah tidak menyala selama 3 hari.",
-          status: "Diproses",
-          hovered: false,
-        },
-        {
-          judul: "Kebersihan Toilet Umum",
-          kategori: "Kebersihan",
-          deskripsi:
-            "Toilet umum di Gedung B sangat kotor dan tidak ada sabun cuci tangan.",
-          status: "Selesai",
-          hovered: false,
-        },
-        {
-          judul: "AC Tidak Berfungsi",
-          kategori: "Fasilitas",
-          deskripsi:
-            "AC di ruang rapat tidak berfungsi sehingga ruangan terasa sangat panas.",
-          status: "Dibatalkan",
-          hovered: false,
-        },
-        {
-          judul: "Layanan Pengurusan KRS",
-          kategori: "Layanan",
-          deskripsi: "Pengurusan KRS mengalami kendala saat proses login.",
-          status: "Diproses",
-          hovered: false,
-        },
-        {
-          judul: "Jadwal Kuliah Tidak Sesuai",
-          kategori: "Akademik",
-          deskripsi: "Jadwal kuliah tidak sesuai dengan pengumuman sebelumnya.",
-          status: "Selesai",
-          hovered: false,
-        },
-      ],
-      showDetailCard: false,
-      selectedAduan: null,
-      isEditing: false,
-    };
-  },
-  computed: {
-    filteredAduan() {
-      return this.aduanList.filter((aduan) => {
-        const matchesSearch =
-          this.searchQuery === "" ||
-          aduan.judul.toLowerCase().includes(this.searchQuery.toLowerCase());
-        const matchesCategory =
-          this.selectedCategory === "" || aduan.kategori === this.selectedCategory;
-        return matchesSearch && matchesCategory;
-      });
-    },
-  },
-  methods: {
-    statusClass(status) {
-      switch (status) {
-        case "Selesai":
-          return "bg-success text-white";
-        case "Diproses":
-          return "bg-warning text-dark";
-        case "Dibatalkan":
-          return "bg-danger text-white";
-        default:
-          return "bg-secondary text-white";
-      }
-    },
-    lihatDetail(aduan) {
-      this.selectedAduan = aduan;
-      this.showDetailCard = true;
-    },
-    editAduan(aduan) {
-      this.selectedAduan = aduan;
-      this.isEditing = true;
-      this.showDetailCard = true;
-    },
-    updateAduan() {
-      alert(`Mengupdate pengaduan: ${this.selectedAduan.judul}`);
-      this.isEditing = false;
-    },
-    deleteAduan(aduan) {
-      const index = this.aduanList.indexOf(aduan);
-      if (index !== -1) {
-        this.aduanList.splice(index, 1);
-      }
-    },
-    toggleEditMode() {
-      this.isEditing = !this.isEditing;
-    },
-    onCardHover(hover, index) {
-      this.aduanList[index].hovered = hover;
-    },
-  },
-};
-</script>
-
 <style scoped>
-/* Styling untuk tombol detail */
 .custom-btn-detail {
   background-color: #143672;
   color: white;
   border-radius: 25px;
   padding: 10px 20px;
   border: none;
+  transition: background-color 0.3s ease;
 }
 
 .custom-btn-detail:hover {
@@ -271,79 +346,78 @@ export default {
   cursor: pointer;
 }
 
-/* Styling untuk dropdown kategori */
 .custom-dropdown {
   border-radius: 20px;
   padding: 10px;
   border: 1px solid #ddd;
 }
 
-/* Styling untuk card */
 .card {
   border-radius: 15px;
   transition: transform 0.3s ease-in-out;
+  border: none;
 }
 
 .card:hover {
-  transform: scale(1.05);
+  transform: scale(1.02);
 }
 
-.bg-blue {
-  background-color: #e6f4ff;
-}
-
-/* Styling untuk modal detail pengaduan */
-.modal-detail {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1050;
-}
-
-.close-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 30px;
-  color: #333;
-  cursor: pointer;
-}
-
-/* Styling untuk card detail pengaduan */
-.detail-card {
-  background-color: white;
-  width: 80%;
-  max-width: 600px;
-}
-
-.form-control {
+.form-control, .form-select {
   border-radius: 10px;
+  border: 1px solid #ddd;
+  padding: 0.75rem;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #143672;
+  box-shadow: 0 0 0 0.2rem rgba(20, 54, 114, 0.25);
 }
 
 .form-group {
   margin-bottom: 15px;
 }
 
+.form-select {
+  height: 42px;
+  padding: 0.375rem 2.25rem 0.375rem 0.75rem;
+}
+
 .delete-icon {
-  font-size: 20px;
-  margin-left: 10px;
+  font-size: 1.25rem;
+  transition: color 0.3s ease;
+}
+
+.delete-icon:hover {
+  color: #dc3545;
 }
 
 .text-primary {
-  color: #143672;
+  color: #143672 !important;
 }
 
-.transform-scale {
-  transform: scale(1.05);
+.form-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #333;
 }
 
-.text-muted {
-  color: #6c757d !important;
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.spinner-border {
+  width: 1.5rem;
+  height: 1.5rem;
 }
 </style>

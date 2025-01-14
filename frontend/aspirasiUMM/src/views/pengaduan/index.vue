@@ -1,12 +1,11 @@
 <template>
-  <!-- Bagian Slider -->
   <section
     class="slider_section position-relative overflow-hidden"
     style="background-color: #f8f9fa"
   >
     <div class="container py-5">
       <div class="row align-items-center">
-        <!-- Teks Informasi -->
+        
         <div class="col-md-6">
           <div class="detail-box">
             <h1 class="text-danger display-4 fw-bold">
@@ -21,7 +20,7 @@
             <router-link :to="{ name: 'buat-aduan' }" class="btn custom-btn-primary btn-lg mt-3 px-4">Formulir Pengaduan</router-link>
           </div>
         </div>
-        <!-- Ilustrasi atau Gambar -->
+        
         <div class="col-md-6">
           <img
             src="../../assets/suaraa.png"
@@ -31,11 +30,11 @@
         </div>
       </div>
     </div>
-    <!-- Elemen Dekoratif -->
+    
     <div class="decorative-circle position-absolute"></div>
     <div class="decorative-circle small position-absolute"></div>
 
-    <!-- Elemen Animasi Partikel -->
+   
     <div class="particle-container">
       <div class="particle"></div>
       <div class="particle"></div>
@@ -43,7 +42,7 @@
     </div>
   </section>
 
-  <!-- Kategori Pengaduan -->
+  
   <div class="mt-5 mx-5">
     <h2 class="text-dark fw-bold text-center">Kategori Pengaduan</h2>
     <p class="text-muted text-center mb-4">
@@ -163,6 +162,7 @@
 
 <script>
 export default {
+  name: 'pengaduan',
   data() {
     return {
       searchQuery: "",
@@ -205,6 +205,11 @@ export default {
       ],
     };
   },
+
+  created() {
+    
+    this.checkAuth()
+  },
   computed: {
     filteredProfiles() {
       return this.profiles.filter((profile) => {
@@ -221,12 +226,22 @@ export default {
     viewDetails() {
       alert("Navigasi ke halaman detail belum diimplementasikan.");
     },
+
+    checkAuth() {
+      const token = localStorage.getItem('token')
+      if (!token) {
+        this.$router.push({ 
+          name: 'login',
+          query: { redirect: this.$route.fullPath }
+        })
+      }
+    },
   },
 };
 </script>
 
 <style scoped>
-/* Elemen Dekoratif */
+
 .decorative-circle {
   position: absolute;
   background-color: #0a0f42;
@@ -299,7 +314,7 @@ export default {
   }
 }
 
-/* Gaya tombol */
+
 .custom-btn-primary {
   background-color: #0a0f42;
   color: #fff;
@@ -311,13 +326,13 @@ export default {
   background-color: #081030;
 }
 
-/* Gaya kartu */
+
 .custom-card {
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 10px;
 }
 
-/* Gaya umum */
+
 .text-center {
   text-align: center;
 }
@@ -340,20 +355,20 @@ export default {
 }
 
 .tag-card {
-  border: 2px solid #dc3545; /* Border merah */
-  color: #dc3545; /* Teks merah */
-  background-color: #fff; /* Background putih */
-  transition: all 0.3s ease-in-out; /* Transisi yang halus */
+  border: 2px solid #dc3545; 
+  color: #dc3545; 
+  background-color: #fff;
+  transition: all 0.3s ease-in-out;
 }
 
 .tag-card:hover {
-  background-color: #dc3545; /* Background merah saat hover */
-  color: #fff; /* Teks putih saat hover */
-  border-color: #dc3545; /* Border tetap merah */
+  background-color: #dc3545;
+  color: #fff;
+  border-color: #dc3545; 
 }
 
 .tag-card:hover .card-title,
 .tag-card:hover i {
-  color: #fff; /* Pastikan teks dan ikon berubah menjadi putih */
+  color: #fff;
 }
 </style>

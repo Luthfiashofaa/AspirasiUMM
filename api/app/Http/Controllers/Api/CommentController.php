@@ -31,7 +31,28 @@ class CommentController extends Controller
      * @return void 
      */
 
-
+     public function getComplaintComments($complaintId)
+     {
+         try {
+             $comments = Comment::with('user')
+                 ->where('pengaduan_id', $complaintId)
+                 ->orderBy('created_at', 'desc')
+                 ->get();
+ 
+             return response()->json([
+                 'success' => true,
+                 'message' => 'Data comments retrieved successfully',
+                 'data' => $comments
+             ]);
+         } catch (\Exception $e) {
+             return response()->json([
+                 'success' => false,
+                 'message' => 'Failed to retrieve comments',
+                 'error' => $e->getMessage()
+             ], 500);
+         }
+     }
+     
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -70,11 +91,8 @@ class CommentController extends Controller
 
     public function update(Request $request, $id)
     {
-        $validator = Validator::make($request->all(), [
-            'pengaduan_id'  => 'required|exists:complaints,id',
-            'user_id'       => 'required|exists:users,nim',      
-            'isi_komentar'  => 'required',                      
-            'is_admin'      => 'required|boolean',          
+        $validator = Validator::make($request->all(), [  
+            'isi_komentar'  => 'required',                              
         ]);
 
         //check if validation fails
@@ -86,10 +104,7 @@ class CommentController extends Controller
         $comment = Comment::find($id);
 
         $comment->update([
-            'pengaduan_id'  => $request->pengaduan_id,
-            'user_id'       => $request->user_id,     
-            'isi_komentar'  => $request->isi_komentar,
-            'is_admin'      => $request->is_admin,   
+            'isi_komentar' => $request->isi_komentar
         ]);
 
         //return response

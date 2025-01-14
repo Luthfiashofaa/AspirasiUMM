@@ -69,30 +69,50 @@ class ComplaintController extends Controller
 
     public function update(Request $request, $id)
     {
-        $validator = Validator::make($request->all(), [       
-            'judul'         => 'required|string',                 
-            'deskripsi'     => 'required|string',                
-            'status'        => 'required|string',            
-            'kategori'      => 'required|string',            
-        ]);
+        // Check if only status is being updated
+        if ($request->has('status') && count($request->all()) === 1) {
+            $validator = Validator::make($request->all(), [
+                'status' => 'required|string|in:unanswered,answered',
+            ]);
+        } else {
+            // Original validation for full updates
+            $validator = Validator::make($request->all(), [
+                'judul'     => 'required|string',
+                'deskripsi' => 'required|string',
+                'status'    => 'required|string|in:unanswered,answered',
+                'kategori'  => 'required|string',
+            ]);
+        }
 
-        //check if validation fails
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
 
-        //find post by ID
         $complaint = Complaint::find($id);
+        
+        if (!$complaint) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Complaint not found'
+            ], 404);
+        }
 
-        $complaint->update([ 
-            'judul'      => $request->judul,     
-            'deskripsi'  => $request->deskripsi,  
-            'status'     => $request->status,   
-            'kategori'   => $request->kategori,    
-        ]);
+        // If only status is being updated
+        if ($request->has('status') && count($request->all()) === 1) {
+            $complaint->update([
+                'status' => $request->status
+            ]);
+        } else {
+            // Full update
+            $complaint->update([
+                'judul'     => $request->judul,
+                'deskripsi' => $request->deskripsi,
+                'status'    => $request->status,
+                'kategori'  => $request->kategori,
+            ]);
+        }
 
-        //return response
-        return new ComplaintResource (true, 'Data Comment Berhasil Diubah!', $complaint);
+        return new ComplaintResource(true, 'Data Complaint Berhasil Diubah!', $complaint);
     }
 
     public function destroy($id)

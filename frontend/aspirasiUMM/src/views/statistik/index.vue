@@ -28,7 +28,7 @@
   <div class="col-md-3">
     <div class="text-center py-4 rounded shadow-sm text-white" :style="{ backgroundColor: '#141E46' }">
       <h1 class="fw-bold">{{ security }}</h1>
-      <p class="text-white">Keamanan</p>
+      <p class="text-white">Akademik</p>
     </div>
   </div>
 </div>
@@ -42,11 +42,11 @@
   export default {
     data() {
       return {
-        totalReports: 959139,
-        services: 1200,
-        cleanliness: 800,
-        facilities: 950,
-        security: 700,
+        totalReports: 700,
+        services: 150,
+        cleanliness: 80,
+        facilities: 278,
+        security: 192,
       };
     },
     methods: {

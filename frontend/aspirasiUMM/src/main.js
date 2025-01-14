@@ -12,6 +12,7 @@ import './assets/css/responsive.css';
 import './assets/css/font-awesome.min.css';
 import './assets/css/login.css';
 import './assets/css/dashboard.css';
+import './assets/css/style.min.css';
 import 'owl.carousel';
 import '../public/js/bootstrap.js';
 import 'owl.carousel/dist/assets/owl.carousel.css';

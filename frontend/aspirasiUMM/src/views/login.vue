@@ -28,10 +28,6 @@
         <input type="submit" :value="loading ? 'Loading...' : 'Login'" :disabled="loading">
       </form>
 
-      <a href="#" @click.prevent="forgotPassword">Forget Password<br></a>
-      <div class="text-center">
-        <p style="color: #C70039;">Sign-Up</p>
-      </div>
     </div>
   </div>
 </template>
@@ -42,7 +38,6 @@ import { ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 
-// Update axios configuration
 axios.defaults.baseURL = 'http://localhost:8000'
 axios.defaults.withCredentials = true
 axios.defaults.headers.common['Accept'] = 'application/json'
@@ -78,7 +73,7 @@ export default {
     
     axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`
     
-    router.push('/')  // Arahkan ke halaman utama setelah login
+    router.push('/') 
   } catch (err) {
     if (err.response?.status === 500) {
       error.value = 'A server error occurred. Please try again later.'
